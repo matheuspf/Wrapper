@@ -8,14 +8,12 @@ using namespace std;
 
 int main ()
 {
-    //wrp::Wrapper<cv::Vec<char, 3>>() * wrp::Wrapper<cv::Vec<double, 3>>();
+    wrp::Wrapper<cv::Vec<char, 3>>() + wrp::Wrapper<cv::Vec<double, 3>>();
 
 
-    //wrp::Wrapper<int>(wrp::Wrapper<char>());
+    //auto x = wrp::Wrapper<cv::Vec<int, 3>>(1, 2, 3) * wrp::Wrapper<cv::Vec<double, 3>>(0.5, 2.4, 3.3);
 
-    auto x = wrp::Wrapper<cv::Vec<int, 3>>(1, 2, 3) * wrp::Wrapper<cv::Vec<double, 3>>(0.5, 2.4, 3.3);
-
-    cout << x << endl;
+    //cout << x << endl;
 
 
     //wrp::impl::PrintType<decltype(x)>();

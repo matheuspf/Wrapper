@@ -2,6 +2,16 @@
 #define WRAPPER_H
 #include "Wrapper_Utils.h"
 
+#define USING_WRAPPER(...)  using Base = __VA_ARGS__;  \
+\
+                            using Base::Wrapper;    \
+                            using Base::operator=;  \
+\
+                            using Base::t;  \
+\
+                            using Type     = typename Base::Type;  \
+                            using BaseType = typename Base::BaseType;
+
 
 namespace wrp
 {
@@ -69,6 +79,9 @@ struct Wrapper
 	explicit constexpr operator U() const { return t; }
 
 
+    explicit constexpr operator BaseType&() { return t; }
+    explicit constexpr operator BaseType() const { return t; }
+
 
 	decltype(auto) operator = (BaseType& x) { t = x; return *this; }
 	decltype(auto) operator = (BaseType&& x) { t = std::move(x); return *this; }
@@ -111,21 +124,14 @@ struct Wrapper;
 template <typename T>
 struct Wrapper<T> : public Wrapper<T, std::decay_t<T>>
 {
-    using Wrapper<T, std::decay_t<T>>::Wrapper;
+    USING_WRAPPER(Wrapper<T, std::decay_t<T>>)
 };
 
 
 template <typename T>
 struct Wrapper<T, std::enable_if_t<std::is_fundamental<std::decay_t<T>>::value, std::decay_t<T>>> : public impl::Wrapper<T>
 {
-
-    using Base = impl::Wrapper<T>;
-
-    using Base::Base;
-    using Base::t;
-
-    using Type     = T;
-    using BaseType = typename Base::BaseType;
+    USING_WRAPPER(impl::Wrapper<T>)
 
 
 
@@ -150,10 +156,10 @@ decltype(auto) operator OP ## = (const Wrapper<U>& w) { return *this += w.t; }  
 template <typename U>   \
 friend decltype(auto) operator OP (const Wrapper& w, const Wrapper<U>& z) { OpType_t<U> r(w); r OP ## = z.t; return r; }     \
 \
-template <typename U>   \
+template <typename U, typename = std::enable_if_t<!impl::IsWrapper<U>::value>>   \
 friend decltype(auto) operator OP (const Wrapper& w, const U& u) { OpType_t<U> r(w); r OP ## = u; return r; }    \
 \
-template <typename U>   \
+template <typename U, typename = std::enable_if_t<!impl::IsWrapper<U>::value>>   \
 friend decltype(auto) operator OP (const U& u, const Wrapper& w) { OpType_t<U> r(w); r OP ## = u; return r; }
 
 
@@ -176,18 +182,11 @@ friend decltype(auto) operator OP (const U& u, const Wrapper& w) { OpType_t<U> r
 template <typename T, typename V, int N>
 struct Wrapper<T, cv::Vec<V, N>> : public impl::Wrapper<T>
 {
-    using Base = impl::Wrapper<T>;
-
-    using Base::Base;
-    using Base::t;
-
-    using Type     = T;
-    using BaseType = typename Base::BaseType;
-
+    USING_WRAPPER(impl::Wrapper<T>)
 
 
     template <typename U>
-    struct OpType { using Type = Wrapper<cv::Vec<decltype(std::declval<BaseType>() * std::declval<std::decay_t<U>>()), N>>; };
+    struct OpType { using Type = Wrapper<cv::Vec<decltype(std::declval<std::decay_t<V>>() * std::declval<std::decay_t<U>>()), N>>; };
 
     template <typename U>
     struct OpType<Wrapper<U>> { using Type = typename OpType<U>::Type; };
