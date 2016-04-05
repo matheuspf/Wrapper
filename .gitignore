@@ -2,4 +2,5 @@
 #.exe
 a.exe
 main.exe
+main.o
 Wrapper.exe
