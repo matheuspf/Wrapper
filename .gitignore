@@ -4,3 +4,4 @@ a.exe
 main.exe
 main.o
 Wrapper.exe
+Wrapper_Failed.h
