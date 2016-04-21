@@ -5,3 +5,4 @@ main.exe
 main.o
 Wrapper.exe
 Wrapper_Failed.h
+Wrapper_Copy.h

@@ -31,6 +31,21 @@ inline std::decay_t<T>& lval ()     // Simple function for efficiently returning
 }
 
 
+template <bool...>
+struct And;
+
+template <bool B1, bool... Bs>
+struct And<B1, Bs...> : public And<Bs...> {};
+
+template <bool... Bs>
+struct And<false, Bs...> : public std::false_type {};
+
+template <>
+struct And<true> : public std::true_type {};
+
+
+
+
 template <typename T, typename U>
 struct TypePrec
 {
@@ -45,7 +60,6 @@ struct TypePrec<cv::Vec<T, N>, cv::Vec<U, N>>
 
 template <typename T, typename U>
 using TypePrec_t = typename TypePrec<T, U>::Type;
-
 
 
 template <typename>
@@ -63,6 +77,7 @@ struct IsVec<cv::Vec<T, N>> : std::true_type {};
 
 
 }   // namespace impl
+
 
 }   // namespace wrp
 
