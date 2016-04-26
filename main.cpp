@@ -6,6 +6,8 @@
 
 /* g++ -I"C:\opencv\build\include" -I"C:\MinGW\include" -L"C:\opencv\mingw64\lib" main.cpp -g C:\MinGW\lib\libboost_thread.a C:\MinGW\lib\libboost_system.a  -lopencv_core249 -lopencv_highgui249 -std=c++14 */
 
+/* clang++ -I"C:\opencv\build\include" -I"C:\MinGW\include" -L"C:\opencv\mingw64\lib" main.cpp -g C:\MinGW\lib\libboost_thread.a C:\MinGW\lib\libboost_system.a  -lopencv_core249 -lopencv_highgui249 -std=c++14 */
+
 
 
 using namespace std;
@@ -15,7 +17,7 @@ using namespace std;
 
 int main ()
 {
-    vector<uchar> v = {3, 5, 1, 4, 2};
+    /*vector<uchar> v = {3, 5, 1, 4, 2};
 
     vector<wrp::Wrapper<uchar&>> u;
     vector<wrp::Wrapper<uchar>> w;
@@ -36,7 +38,7 @@ int main ()
     for(int i = 0; i < u.size(); ++i) cout << u[i] << endl;
     cout << endl;
 
-    for(int i = 0; i < w.size(); ++i) cout << w[i] << endl;
+    for(int i = 0; i < w.size(); ++i) cout << w[i] << endl;*/
 
 
 
@@ -44,8 +46,8 @@ int main ()
 
 
 
-    /*vector<wrp::Wrapper<cv::Vec3b>> v = { {0, 1, 2}, {3, 4, 5}, {6, 7, 8} };
-    vector<wrp::Wrapper<cv::Vec3d>> u = { {0.0, 0.1, 0.2}, {0.3, 0.4, 0.5}, {0.6, 0.7, 0.8} };
+    vector<wrp::Wrapper<std::array<int, 3>>> v = { {0, 1, 2}, {3, 4, 5}, {6, 7, 8} };
+    vector<wrp::Wrapper<std::array<double, 3>>> u = { {0.0, 0.1, 0.2}, {0.3, 0.4, 0.5}, {0.6, 0.7, 0.8} };
     vector<decltype(v[0] * u[0])> r(v.size());
 
     std::transform(v.begin(), v.end(), u.begin(), r.begin(), [](const auto& x, const auto& y){ return y * x; });
@@ -54,13 +56,13 @@ int main ()
         cout << x << endl;
 
 
-    auto x = v[0] + u[0];
+    (v[0] + u[0]);
     auto y = v[0] + 3;
     auto z = 3 + v[0];
     v[0] /= 2;
 
 
-    std::sort(v.begin(), v.end(), [](auto&& x, auto&& y){ return x[0] < y[0]; });*/
+    std::sort(v.begin(), v.end(), [](auto&& x, auto&& y){ return x[0] < y[0]; });
 
 
     return 0;

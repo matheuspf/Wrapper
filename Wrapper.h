@@ -52,14 +52,14 @@ struct Wrapper
     // Delegating constructor only if Type is not a reference
 
 	template <typename... Args, typename U = T, typename = std::enable_if_t<!std::is_reference<U>::value>>
-	constexpr Wrapper (Args&&... args) : t(std::forward<Args>(args)...) {}
+	constexpr Wrapper (Args&&... args) : t{std::forward<Args>(args)...} {}
 
 
-    constexpr Wrapper (BaseType& b) : t(b) {}
+    constexpr Wrapper (BaseType& b) : t{b} {}
 
-    constexpr Wrapper (BaseType&& b) : t(std::move(b)) {}
+    constexpr Wrapper (BaseType&& b) : t{std::move(b)} {}
 
-    constexpr Wrapper (const BaseType& b) : t(b) {}
+    constexpr Wrapper (const BaseType& b) : t{b} {}
 
 
 
@@ -147,9 +147,101 @@ struct Wrapper<T, std::enable_if_t<std::is_fundamental<std::decay_t<T>>::value, 
 
 
 
+
 //========================================================================================
 
+// std::array
 
+template <typename T, typename V, std::size_t N>
+struct Wrapper<T, std::array<V, N>> : public impl::Wrapper<T>
+{
+    USING_WRAPPER(impl::Wrapper<T>)
+
+
+    template <typename U>
+	constexpr Wrapper (const std::array<U, N>& u) { std::copy(u.begin(), u.end(), t.begin()); }
+
+
+
+
+    template <typename>
+    struct IsArray : std::false_type {};
+
+    template <typename U, std::size_t M>
+    struct IsArray<std::array<U, M>> : std::true_type {};
+
+    template <class U>
+    static constexpr bool isArray = IsArray<U>::value;
+
+
+
+    template <typename U>
+    struct OpType { using Type = Wrapper<std::array<decltype(std::declval<std::decay_t<V>>() * std::declval<std::decay_t<U>>()), N>>; };
+
+    template <typename U>
+    struct OpType<Wrapper<U>> { using Type = typename OpType<U>::Type; };
+
+    template <typename U>
+    struct OpType<std::array<U, N>> { using Type = typename OpType<U>::Type; };
+
+    template <typename U>
+    using OpType_t = typename OpType<U>::Type;
+
+
+
+#define DEFAULT_OP(OP)  \
+\
+    template <typename U>   \
+    decltype(auto) operator OP ## = (const U& u) { for(int i = 0; i < N; ++i) t[i] OP ## = u; return *this; }    \
+\
+    template <typename U>   \
+    decltype(auto) operator OP ## = (const std::array<U, N>& v) { for(int i = 0; i < N; ++i) t[i] OP ## = v[i]; return *this; }   \
+\
+    template <typename U>   \
+    decltype(auto) operator OP ## = (const Wrapper<U>& w) { return *this OP ## = w.t; }     \
+\
+    template <typename U>   \
+    decltype(auto) operator OP (const U& u) const { OpType_t<U> r(t); r OP ## = u; return r; }    \
+\
+    template <typename U, typename = std::enable_if_t<!impl::IsWrapper<std::decay_t<U>>::value>>   \
+    friend decltype(auto) operator OP (const U& u, const Wrapper& w) { return w * u; }
+
+
+DEFAULT_OP(+);
+DEFAULT_OP(-);
+DEFAULT_OP(*);
+DEFAULT_OP(/);
+
+
+#undef OP_TYPE
+#undef DEFAULT_OP
+
+
+    template <typename U>
+    double operator * (const std::array<U, N>& u) const
+    {
+        decltype(std::decay_t<V>() * std::decay_t<U>()) r{};
+
+        for(int i = 0; i < N; ++i)
+            r += t[i] * u[i];
+
+        return r;
+    }
+
+    template <typename U, typename = std::enable_if_t<isArray<std::decay_t<U>>>>
+    double operator * (const Wrapper<U>& w) const { return *this * w.t; }
+
+};
+
+
+
+
+//========================================================================================
+
+// cv::Vec
+
+//#define USING_OPENCV
+#ifdef USING_OPENCV
 
 template <typename T, typename V, int N>
 struct Wrapper<T, cv::Vec<V, N>> : public impl::Wrapper<T>
@@ -215,6 +307,8 @@ DEFAULT_OP(/);
     double operator * (const Wrapper<U>& w) const { return *this * w.t; }
 
 };
+
+#endif  // USING_OPENCV
 
 
 }   // namespace wrp

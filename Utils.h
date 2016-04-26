@@ -2,8 +2,17 @@
 #define WRAPPER_UTILS_H
 #include <iostream>
 #include <type_traits>
+
+#define USING_OPENCV
+
+
+#ifdef USING_OPENCV
+
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+
+#endif
+
 
 
 namespace wrp
@@ -69,11 +78,15 @@ template <typename... Args>
 struct IsWrapper<Wrapper<Args...>> : std::true_type {};
 
 
+#ifdef USING_OPENCV
+
 template <typename>
 struct IsVec : std::false_type {};
 
 template <typename T, int N>
 struct IsVec<cv::Vec<T, N>> : std::true_type {};
+
+#endif
 
 
 }   // namespace impl
